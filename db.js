@@ -1,18 +1,13 @@
 
 const Sequelize = require('sequelize');
 
-const sequelize = new Sequelize('hobbiton', 'postgres', 'Rska2017!', {
-    host: 'localhost', 
-    dialect: 'postgres' 
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: 'postgres'
 });
 
-sequelize.authenticate().then(
-    function() { 
-        console.log('Connected to hobbiton postgres database');
-    },
-    function(err){ 
-        console.log(err);
-    }
-);
+sequelize.authenticate()
+.then(() => console.log('Connected to postgres database'))
+.catch(err => console.log(err))
+
 
 module.exports = sequelize;
