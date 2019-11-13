@@ -38,7 +38,10 @@ router.put('/update/:id', validateSession, (req, res) => {
         owner: req.body.owner
     },
     {
-        where: {id: req.params.id}
+        where: {
+            id : req.params.id,
+            owner: req.user.id
+        }
     })
         .then(
             updateSuccess = recordsChanged => {
@@ -53,9 +56,9 @@ router.put('/update/:id', validateSession, (req, res) => {
 
 router.get('/dir', validateSession, (req,res) => {
     Home.findAll({
-        where: {
-            owner: req.user.id
-          }
+        // where: {
+        //     owner: req.user.id
+        //   }
     })
         .then(home => res.status(200).json(home))   
         .catch(err => res.status(500).json({error:err}))
