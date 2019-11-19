@@ -4,6 +4,7 @@ var sequelize = require('../db');
 var User = sequelize.import('../models/user');
 var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
+const validateSession = require('../middleware/validate-session');
 
 router.post('/create', function(req,res){
     var username = req.body.username;
@@ -54,15 +55,16 @@ router.post('/login', function(req,res){
     )
 })
 
-
-
-
-
-
-
-
-
-
+router.get('/getuser', validateSession, (req, res) => {
+    User.findAll({ 
+        // where: {
+        //     owner:req.user.id
+        // }, 
+        include: ['homes', 'mischiefs']
+    })
+        .then(info => res.status(200).json(info))
+        .catch(err => res.status(500).json(err))
+})
 
 
 

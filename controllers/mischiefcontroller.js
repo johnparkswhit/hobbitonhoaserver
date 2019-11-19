@@ -1,24 +1,20 @@
 var router = require('express').Router();
-var Home = require('../db').import('../models/home');
+var Mischiefs = require('../db').import('../models/mischiefs');
 const validateSession = require('../middleware/validate-session');
 
 module.exports = router;
 
-router.post('/create', validateSession, (req,res) => {
-    Home.create({
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        address: req.body.address, 
-        occupation: req.body.occupation,
-        publicMessage: req.body.publicMessage,
-        emergencyContact: req.body.emergencyContact,
-        owner: req.user.id,
-        userId: req.user.id,
+router.post('/report', validateSession, (req,res) => {
+    Mischiefs.create({
+        complaint: req.body.complaint,
+        suspect: req.body.suspect,
+        owner: req.user.username,
+        userId: req.user.id
     }).then(
-        function createSuccess(home){
+        function createSuccess(mischiefs){
             res.status(200).json({
-                home: home,
-                message: 'Home Created',
+                mischiefs: mischiefs,
+                message: 'Report has been logged',
             });
         },
         function createError(err) {
@@ -29,24 +25,20 @@ router.post('/create', validateSession, (req,res) => {
 
 
 router.put('/update/:id', validateSession, (req, res) => {
-    Home.update({ 
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        address: req.body.address, 
-        occupation: req.body.occupation,
-        publicMessage: req.body.publicMessage,
-        emergencyContact: req.body.emergencyContact,
-        owner: req.body.owner
+    Mischiefs.update({ 
+        complaint: req.body.complaint,
+        suspect: req.body.suspect,
+        owner: req.user.username,
     },
     {
         where: {
             id : req.params.id,
-            owner: req.user.id
+            owner: req.user.username
         }
     })
         .then(
             updateSuccess = recordsChanged => {
-                res.status(200).json({message:'Home updated'})
+                res.status(200).json({message:'Report Updated'})
             },
             updateFail = err => {
                 res.status(500).json({message:'Update failed', error:err})
@@ -55,36 +47,37 @@ router.put('/update/:id', validateSession, (req, res) => {
 });
 
 
-router.get('/dir', validateSession, (req,res) => {
-    Home.findAll({
+router.get('/', validateSession, (req,res) => {
+    Mischiefs.findAll({
         // where: {
         //     owner: req.user.id
         //   }
-        include:'user'
+        include: 'user'
     })
-        .then(home => res.status(200).json(home))   
+        .then(mischiefs => res.status(200).json(mischiefs))   
         .catch(err => res.status(500).json({error:err}))
 })
 
-router.get('/dir/:id', validateSession, (req,res) => {
+router.get('/:id', validateSession, (req,res) => {
     console.log(req.params.id, req.user.id)
-    Home.findOne({
+    Mischiefs.findOne({
         where: {
             id : req.params.id,
-            owner: req.user.id
-        }, 
+            owner: req.user.username,
+            userId: req.user.id
+        },
         include: 'user'
     })
-        .then(home => res.status(200).json(home))
+        .then(mischiefs => res.status(200).json(mischiefs))
         .catch(err => res.status(500).json({error:err}))
 })
 
 
 router.delete('/delete/:id', validateSession, (req, res) => {
-    Home.destroy({
+    Mischiefs.destroy({
         where: {
             id : req.params.id,
-            owner: req.user.id
+            owner: req.user.username
         }
     })
       .then(
